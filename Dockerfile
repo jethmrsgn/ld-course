@@ -10,4 +10,4 @@ COPY course/main.py .
 COPY course/models.py .
 COPY course.db .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]

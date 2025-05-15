@@ -10,4 +10,4 @@
 
 3. In your git terminal execute this code to create and run the docker image.
 <pre>docker build -t course-app .
-docker run -p 8000:8000 course-app</pre>
+docker run -p 8002:8002 course-app</pre>

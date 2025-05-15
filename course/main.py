@@ -3,6 +3,7 @@ from sqlmodel import Session, SQLModel, create_engine, select
 from typing import Annotated
 
 from models import Course
+# from fastapi.security.
 
 import uvicorn
 
@@ -13,6 +14,13 @@ sqlite_url = f'sqlite:///{sqlite_file_name}'
 
 connect_args = {'check_same_thread': False}
 engine = create_engine(sqlite_url, connect_args=connect_args)
+
+
+# DATABASE_URL = "mysql+pymysql://admin:admintest@ld77.ci9mca82oykl.us-east-1.rds.amazonaws.com:3306/ld-dev"
+# engine = create_engine(DATABASE_URL, echo=False)
+
+
+
 
 
 def create_db_and_tables():
@@ -51,5 +59,5 @@ def course_details(session:SessionDep,
 
     return course
 
-if __name__ == '__main__':
-    uvicorn.run(app, port=8000, host= '0.0.0.0')
+# if __name__ == '__main__':
+#     uvicorn.run(app, port=8000, host= '0.0.0.0')
