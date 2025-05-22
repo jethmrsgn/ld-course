@@ -44,14 +44,14 @@ def on_startup():
 def course_list(session:SessionDep,
                 offset:int=0,
                 limit:Annotated[int,Query(le=100)]=100
-                )-> list[str]:
+                )-> list[Course]:
     courses = session.exec(select(Course).offset(offset).limit(limit)).all()
-    return [course.title for course in courses]
+    return courses
 
-@app.get('/course/details/{title}',tags=['Course'])
+@app.get('/course/details/{id}',tags=['Course'])
 def course_details(session:SessionDep,
-                   title: Annotated[str,Path(title='Title of the course to get for details')])-> Course:
-    statement = select(Course).where(Course.title == title)
+                   id: Annotated[int,Path(title='Title of the course to get for details')])-> Course:
+    statement = select(Course).where(Course.id == id)
     course = session.exec(statement).first()
 
     if not course:
