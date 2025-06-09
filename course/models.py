@@ -14,8 +14,6 @@ class Course(SQLModel, table=True):
 
 
 class MainLevel(SQLModel, table=True):
-    __table_args__ = (UniqueConstraint("course_id", "name", name="uq_course_level_name"),)
-
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     course_id: int = Field(foreign_key="course.id")

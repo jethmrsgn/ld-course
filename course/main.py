@@ -68,9 +68,7 @@ def course_list(session:SessionDep,
 
 @app.get('/course/details/{id}',tags=['Course'])
 def course_details(session:SessionDep,
-                   id: Annotated[int,Path(title='id of the course to get for details')],
-                   level: MainLevelName | None = None,
-                   category: CategoryName | None = None):
+                   id: Annotated[int,Path(title='id of the course to get for details')]):
     statement = select(Course).options(
             selectinload(Course.levels),
             selectinload(Course.levels).selectinload(MainLevel.categories),
@@ -90,6 +88,7 @@ def create_course(session:SessionDep,course_data:CourseCreate):
 
     level_names = [level.name for level in course_data.levels]
 
+    # Duplicate Check for Levels
     if len(set(level_names)) != len(level_names):
         raise HTTPException(
             status_code=400,
@@ -101,6 +100,8 @@ def create_course(session:SessionDep,course_data:CourseCreate):
 
         for category_data in level_data.categories:
             category_names = [c.name for c in level_data.categories]
+
+            # Duplicate Check for Categories
             if len(set(category_names)) != len(category_names):
                 raise HTTPException(
                     status_code=400,
