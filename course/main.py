@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 from typing import Annotated
 from json import dumps
 
-from models import Course,MainLevel,Category,Item, serialize_course
+from .models import Course,MainLevel,Category,Item,CourseCreate,MainLevelName,CategoryName, serialize_course
 # from fastapi.security.
 
 import uvicorn
@@ -68,7 +68,9 @@ def course_list(session:SessionDep,
 
 @app.get('/course/details/{id}',tags=['Course'])
 def course_details(session:SessionDep,
-                   id: Annotated[int,Path(title='id of the course to get for details')]):
+                   id: Annotated[int,Path(title='id of the course to get for details')],
+                   level: MainLevelName | None = None,
+                   category: CategoryName | None = None):
     statement = select(Course).options(
             selectinload(Course.levels),
             selectinload(Course.levels).selectinload(MainLevel.categories),
@@ -82,5 +84,43 @@ def course_details(session:SessionDep,
 
     return serialize_course(courses)
 
-if __name__ == '__main__':
-    uvicorn.run(app, port=8082, host= '0.0.0.0')
+@app.post('/course/create', tags=['Course'])
+def create_course(session:SessionDep,course_data:CourseCreate):
+    course = Course(title=course_data.title, description=course_data.description)
+
+    level_names = [level.name for level in course_data.levels]
+
+    if len(set(level_names)) != len(level_names):
+        raise HTTPException(
+            status_code=400,
+            detail="Duplicate level are not allowed within the same course."
+        )
+
+    for level_data in course_data.levels:
+        level = MainLevel(name=level_data.name, course=course)
+
+        for category_data in level_data.categories:
+            category_names = [c.name for c in level_data.categories]
+            if len(set(category_names)) != len(category_names):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Duplicate category names in level '{level_data.name.value}'."
+                )
+
+            category = Category(name=category_data.name, main_level=level)
+
+            for item_data in category_data.items:
+                item = Item(content=item_data.name, category=category)
+                category.items.append(item)
+            level.categories.append(category)
+
+        course.levels.append(level)
+
+    session.add(course)
+    session.commit()
+    session.refresh(course)
+
+    return {"message": "Course created successfully"}
+
+# if __name__ == '__main__':
+#     uvicorn.run(app, port=8082, host= '0.0.0.0')
